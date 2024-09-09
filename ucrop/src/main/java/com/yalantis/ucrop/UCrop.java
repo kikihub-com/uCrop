@@ -21,6 +21,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.FloatRange;
+import androidx.annotation.FontRes;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -299,6 +300,8 @@ public class UCrop {
 
         public static final String EXTRA_UCROP_WIDGET_COLOR_TOOLBAR = EXTRA_PREFIX + ".UcropToolbarWidgetColor";
         public static final String EXTRA_UCROP_TITLE_TEXT_TOOLBAR = EXTRA_PREFIX + ".UcropToolbarTitleText";
+        public static final String EXTRA_UCROP_TITLE_TEXT_SIZE_TOOLBAR = EXTRA_PREFIX + ".UcropToolbarTitleTextSize";
+        public static final String EXTRA_UCROP_TITLE_TEXT_FONT_TOOLBAR = EXTRA_PREFIX + ".UcropToolbarTitleTextFont";
         public static final String EXTRA_UCROP_WIDGET_CANCEL_DRAWABLE = EXTRA_PREFIX + ".UcropToolbarCancelDrawable";
         public static final String EXTRA_UCROP_WIDGET_CROP_DRAWABLE = EXTRA_PREFIX + ".UcropToolbarCropDrawable";
 
@@ -484,6 +487,20 @@ public class UCrop {
          */
         public void setToolbarTitle(@Nullable String text) {
             mOptionBundle.putString(EXTRA_UCROP_TITLE_TEXT_TOOLBAR, text);
+        }
+
+        /**
+         * @param textSizeInSp - desired text size in SP for Toolbar title
+         */
+        public void setToolbarTextSize(float textSizeInSp) {
+            mOptionBundle.putFloat(EXTRA_UCROP_TITLE_TEXT_SIZE_TOOLBAR, textSizeInSp);
+        }
+
+        /**
+         * @param font - desired text font from res for Toolbar title
+         */
+        public void setToolbarTextFont(@FontRes int font) {
+            mOptionBundle.putInt(EXTRA_UCROP_TITLE_TEXT_FONT_TOOLBAR, font);
         }
 
         /**
