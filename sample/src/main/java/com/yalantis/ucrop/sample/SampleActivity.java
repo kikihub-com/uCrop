@@ -33,13 +33,18 @@ import com.yalantis.ucrop.UCropFragmentCallback;
 import java.io.File;
 import java.util.Locale;
 import java.util.Random;
+import java.util.logging.Logger;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 /**
  * Created by Oleksii Shliama (https://github.com/shliama).
@@ -77,15 +82,21 @@ public class SampleActivity extends BaseActivity implements UCropFragmentCallbac
     private int mStatusBarColor;
     private int mToolbarWidgetColor;
 
+    private ActivityResultLauncher<Uri> mGetContent;
+    private Uri fileUri;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
+
+        setupCameraContract();
         setupUI();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("TakePictureContract", "onActivityResult ");
         if (resultCode == RESULT_OK) {
             if (requestCode == requestMode) {
                 final Uri selectedUri = data.getData();
@@ -139,11 +150,33 @@ public class SampleActivity extends BaseActivity implements UCropFragmentCallbac
         }
     };
 
+    private void setupCameraContract() {
+        File file = new File(this.getCacheDir(), "cropped_image.jpg");
+        fileUri = FileProvider.getUriForFile(
+                this,
+                getString(R.string.file_provider_authorities),
+                file
+        );
+        mGetContent = registerForActivityResult(
+                new ActivityResultContracts.TakePicture(),
+                new ActivityResultCallback<Boolean>() {
+                    @Override
+                    public void onActivityResult(Boolean result) {
+                        if (result) {
+                            Log.d("TakePictureContract", "result true");
+                            startCrop(fileUri);
+                        }
+                        Log.d("TakePictureContract", "result false null");
+                    }
+                });
+    }
+
     @SuppressWarnings("ConstantConditions")
     private void setupUI() {
         findViewById(R.id.button_crop).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+//                pickFromCamera();
                 pickFromGallery();
             }
         });
@@ -217,6 +250,10 @@ public class SampleActivity extends BaseActivity implements UCropFragmentCallbac
         }
 
         startActivityForResult(Intent.createChooser(intent, getString(R.string.label_select_picture)), requestMode);
+    }
+
+    private void pickFromCamera() {
+        mGetContent.launch(fileUri);
     }
 
     private void startCrop(@NonNull Uri uri) {

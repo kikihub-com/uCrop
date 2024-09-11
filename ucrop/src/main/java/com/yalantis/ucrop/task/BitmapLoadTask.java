@@ -1,11 +1,15 @@
 package com.yalantis.ucrop.task;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -96,18 +100,25 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
         options.inJustDecodeBounds = false;
 
         Bitmap decodeSampledBitmap = null;
+        ContentResolver contentResolver = mContext.getContentResolver();
 
         boolean decodeAttemptSuccess = false;
         while (!decodeAttemptSuccess) {
             try {
-                InputStream stream = mContext.getContentResolver().openInputStream(mInputUri);
+//                InputStream stream = mContext.getContentResolver().openInputStream(mInputUri);
                 try {
-                    decodeSampledBitmap = BitmapFactory.decodeStream(stream, null, options);
-                    if (options.outWidth == -1 || options.outHeight == -1) {
-                        return new BitmapWorkerResult(new IllegalArgumentException("Bounds for bitmap could not be retrieved from the Uri: [" + mInputUri + "]"));
+                    if(Build.VERSION.SDK_INT < 28) {
+                        decodeSampledBitmap = MediaStore.Images.Media.getBitmap(contentResolver, mInputUri);
+                    } else {
+                        ImageDecoder.Source source = ImageDecoder.createSource(contentResolver, mInputUri);
+                        decodeSampledBitmap = ImageDecoder.decodeBitmap(source);
                     }
+//                    decodeSampledBitmap = BitmapFactory.decodeStream(stream, null, options);
+//                    if (options.outWidth == -1 || options.outHeight == -1) {
+//                        return new BitmapWorkerResult(new IllegalArgumentException("Bounds for bitmap could not be retrieved from the Uri: [" + mInputUri + "]"));
+//                    }
                 } finally {
-                    BitmapLoadUtils.close(stream);
+//                    BitmapLoadUtils.close(stream);
                 }
                 if (checkSize(decodeSampledBitmap, options)) continue;
                 decodeAttemptSuccess = true;
